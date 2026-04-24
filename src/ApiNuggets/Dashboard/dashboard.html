@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ApiNuggets Dashboard</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #111c36;
+            --panel-2: #1b2a4a;
+            --fg: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --good: #34d399;
+            --warn: #fbbf24;
+            --bad: #f87171;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+        header { padding: 24px 32px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; }
+        header h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: .2px; }
+        header .meta { color: var(--muted); font-size: 12px; }
+        main { padding: 24px 32px; max-width: 1200px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .card { background: var(--panel); border: 1px solid #1e293b; border-radius: 10px; padding: 18px; }
+        .card h3 { margin: 0 0 8px; color: var(--muted); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; }
+        .card .val { font-size: 28px; font-weight: 600; }
+        .card.good .val { color: var(--good); }
+        .card.warn .val { color: var(--warn); }
+        .card.bad .val { color: var(--bad); }
+        section { margin-top: 28px; }
+        section h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 12px; }
+        table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid #1e293b; border-radius: 10px; overflow: hidden; }
+        th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid #1e293b; }
+        th { background: var(--panel-2); font-weight: 500; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+        tr:last-child td { border-bottom: none; }
+        td.num { text-align: right; font-variant-numeric: tabular-nums; }
+        .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--accent); }
+        .empty { color: var(--muted); padding: 18px; text-align: center; }
+        @media (max-width: 820px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+</head>
+<body>
+<header>
+    <h1><span class="dot"></span>ApiNuggets Dashboard</h1>
+    <div class="meta">Refreshing every 5s &middot; <span id="generated">—</span></div>
+</header>
+<main>
+    <div class="grid">
+        <div class="card"><h3>Total requests</h3><div class="val" id="total">—</div></div>
+        <div class="card"><h3>Avg response (ms)</h3><div class="val" id="avg">—</div></div>
+        <div class="card warn"><h3>Slow requests</h3><div class="val" id="slow">—</div></div>
+        <div class="card bad"><h3>Errors (5xx)</h3><div class="val" id="errors">—</div></div>
+    </div>
+
+    <section>
+        <h2>Top endpoints</h2>
+        <table id="endpoints">
+            <thead>
+                <tr><th>Path</th><th class="num">Requests</th><th class="num">Avg (ms)</th><th class="num">Errors</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </section>
+</main>
+
+<script>
+    const dataUrl = (function () {
+        // The HTML page lives at {Path}/ui; the JSON lives at {Path}.
+        const p = location.pathname.replace(/\/ui\/?$/, "");
+        return p + location.search;
+    })();
+
+    async function refresh() {
+        try {
+            const res = await fetch(dataUrl, { headers: { accept: "application/json" } });
+            if (!res.ok) return;
+            const json = await res.json();
+            // If response-wrapping is on, real payload is under .data.
+            const data = json && typeof json === "object" && "success" in json && "data" in json ? json.data : json;
+
+            document.getElementById("total").textContent = data.totalRequests ?? 0;
+            document.getElementById("avg").textContent = (data.avgResponseTime ?? 0).toFixed ? (data.avgResponseTime).toFixed(1) : data.avgResponseTime;
+            document.getElementById("slow").textContent = data.slowRequests ?? 0;
+            document.getElementById("errors").textContent = data.errorCount ?? 0;
+            document.getElementById("generated").textContent = new Date(data.generatedAt || Date.now()).toLocaleTimeString();
+
+            const tbody = document.querySelector("#endpoints tbody");
+            tbody.innerHTML = "";
+            const rows = (data.topEndpoints || []);
+            if (rows.length === 0) {
+                tbody.innerHTML = "<tr><td colspan=\"4\" class=\"empty\">No requests captured yet. Hit an endpoint to populate.</td></tr>";
+                return;
+            }
+            for (const r of rows) {
+                const tr = document.createElement("tr");
+                tr.innerHTML =
+                    "<td>" + escapeHtml(r.path) + "</td>" +
+                    "<td class=\"num\">" + r.requestCount + "</td>" +
+                    "<td class=\"num\">" + r.avgResponseTime + "</td>" +
+                    "<td class=\"num\">" + r.errorCount + "</td>";
+                tbody.appendChild(tr);
+            }
+        } catch (e) {
+            // swallow — keep retrying
+        }
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    refresh();
+    setInterval(refresh, 5000);
+</script>
+</body>
+</html>
