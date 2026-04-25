@@ -1,43 +1,48 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>latest</LangVersion>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>latest</LangVersion>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
 
-    <!-- NuGet package metadata -->
-    <PackageId>ApiNuggets</PackageId>
-    <Version>1.0.0</Version>
-    <Authors>Yasir Rehman</Authors>
-    <Company>ApiNuggets</Company>
-    <Product>ApiNuggets</Product>
-    <Title>ApiNuggets — batteries-included ASP.NET Core extras</Title>
-    <Description>Plug-and-play ASP.NET Core package bundling JWT auth, API versioning, rate limiting, global exception handling, a standard response wrapper, request logging, and a basic analytics dashboard.</Description>
-    <PackageTags>aspnetcore;jwt;rate-limiting;middleware;analytics;dashboard;api</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryType>git</RepositoryType>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-  </PropertyGroup>
+		<!-- NuGet package metadata -->
+		<PackageId>ApiNuggets</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>Yasir Rehman</Authors>
+		<Company>ApiNuggets</Company>
+		<Product>ApiNuggets</Product>
+		<Title>ApiNuggets — batteries-included ASP.NET Core extras</Title>
+		<Description>Plug-and-play ASP.NET Core package bundling JWT auth, API versioning, rate limiting, global exception handling, a standard response wrapper, request logging, and a basic analytics dashboard.</Description>
+		<PackageTags>aspnetcore;jwt;rate-limiting;middleware;analytics;dashboard;api</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/dynamicyasir/ApiNuggets</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/dynamicyasir/ApiNuggets</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <!-- Microsoft.AspNetCore.Authentication.JwtBearer ships in the shared
-         framework (Microsoft.AspNetCore.App) — no PackageReference needed.
-         System.IdentityModel.Tokens.Jwt stays explicit for token creation. -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.7" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Dashboard\dashboard.html" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.7" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Dashboard\dashboard.html" />
+	</ItemGroup>
 
 </Project>
